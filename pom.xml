@@ -13,6 +13,7 @@
         <module>MessTrek</module>
         <module>TestedTrek</module>
         <module>GettingItWorking</module>
+        <module>MySet</module>
     </modules>
 
     <properties>
