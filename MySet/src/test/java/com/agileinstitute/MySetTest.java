@@ -1,11 +1,20 @@
 package com.agileinstitute;
 
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class MySetTest {
+class MySetTest {
+    private @NonNull MySet makeSetWith(String... elements) {
+        final MySet sut = new MySet();
+        for (String element : elements) {
+            sut.add(element);
+        }
+        return sut;
+    }
+
     @Test
     void aNewSetShouldBeEmpty() {
         // given
@@ -19,9 +28,7 @@ public class MySetTest {
     @Test
     void addingAnElementToAnEmptySetMakesItNonEmpty() {
         // given
-        final MySet sut = new MySet();
-        // when
-        sut.add("something");
+        final MySet sut = makeSetWith("something");
         // then
         final boolean result = sut.isEmpty();
         assertThat(result).isFalse();
@@ -40,8 +47,7 @@ public class MySetTest {
     @Test
     void addingSomethingToTheSetWillMakeItContainIt() {
         // given
-        final MySet sut = new MySet();
-        sut.add("something");
+        final MySet sut = makeSetWith("something");
         // when
         final boolean result = sut.contains("something");
         // then
@@ -51,10 +57,7 @@ public class MySetTest {
     @Test
     void addingTwoItemsShouldContainBothOfThem() {
         // given
-        final MySet sut = new MySet();
-        // when
-        sut.add("something");
-        sut.add("something else");
+        final MySet sut = makeSetWith("something", "something else");
         // then
         assertThat(sut.contains("something")).isTrue();
         assertThat(sut.contains("something else")).isTrue();
@@ -84,10 +87,8 @@ public class MySetTest {
 
     @Test
     void theUnionOfTwoOneElementSetsContainsBothElements() {
-        MySet setA = new MySet();
-        setA.add("something");
-        MySet setB = new MySet();
-        setB.add("something else");
+        MySet setA = makeSetWith("something");
+        MySet setB = makeSetWith("something else");
 
         MySet union = MySet.union(setA, setB);
 
@@ -98,10 +99,8 @@ public class MySetTest {
     @Test
     void theIntersectionOfTwoDistinctOneElementSetsIsEmpty() {
         // given
-        MySet setA = new MySet();
-        setA.add("something");
-        MySet setB = new MySet();
-        setB.add("something else");
+        MySet setA = makeSetWith("something");
+        MySet setB = makeSetWith("something else");
 
         // when
         MySet intersection = MySet.intersect(setA, setB);
@@ -113,8 +112,7 @@ public class MySetTest {
     @Test
     void theIntersectionOfSetWithItselfShouldReturnASetThatContainsTheElementsOfTheOriginalSet() {
         // given
-        MySet setA = new MySet();
-        setA.add("something");
+        MySet setA = makeSetWith("something");
 
         // when
         MySet intersection = MySet.intersect(setA, setA);
@@ -126,10 +124,8 @@ public class MySetTest {
     @Test
     void theIntersectionOfSetWithAnotherSetWithTheSameElementsShouldReturnASetWithTheSameElements() {
         // given
-        MySet setA = new MySet();
-        setA.add("something");
-        MySet setB = new MySet();
-        setB.add("something");
+        MySet setA = makeSetWith("something");
+        MySet setB = makeSetWith("something");
 
         // when
         MySet intersection = MySet.intersect(setA, setB);
@@ -148,8 +144,7 @@ public class MySetTest {
     @Test
     void theEmptySetIsNotASupersetOfANonemptySet() {
         MySet emptySet = new MySet();
-        MySet nonemptySet = new MySet();
-        nonemptySet.add("something");
+        MySet nonemptySet = makeSetWith("something");
 
         assertThat(emptySet.isSupersetOf(nonemptySet)).isFalse();
     }
@@ -157,18 +152,15 @@ public class MySetTest {
     @Test
     void theNonemptySetIsASupersetOfTheEmptySet() {
         MySet emptySet = new MySet();
-        MySet nonemptySet = new MySet();
-        nonemptySet.add("something");
+        MySet nonemptySet = makeSetWith("something");
 
         assertThat(nonemptySet.isSupersetOf(emptySet)).isTrue();
     }
 
     @Test
     void twoDistinctNonEmptySetsAreNotASupersetsOfEachOther() {
-        MySet setA = new MySet();
-        setA.add("something");
-        MySet setB = new MySet();
-        setB.add("something else");
+        MySet setA = makeSetWith("something");
+        MySet setB = makeSetWith("something else");
 
         assertThat(setA.isSupersetOf(setB)).isFalse();
         assertThat(setB.isSupersetOf(setA)).isFalse();
@@ -176,11 +168,8 @@ public class MySetTest {
 
     @Test
     void aSetContainingTheSameElementsAndSomeMoreIsASuperset() {
-        MySet setA = new MySet();
-        setA.add("something");
-        MySet setB = new MySet();
-        setB.add("something");
-        setB.add("something else");
+        MySet setA = makeSetWith("something");
+        MySet setB = makeSetWith("something", "something else");
 
         assertThat(setB.isSupersetOf(setA)).isTrue();
     }
@@ -195,20 +184,48 @@ public class MySetTest {
     @Test
     void theNonemptySetIsNotASubsetOfTheEmptySet() {
         MySet emptySet = new MySet();
-        MySet nonemptySet = new MySet();
-        nonemptySet.add("something");
+        MySet nonemptySet = makeSetWith("something");
 
         assertThat(nonemptySet.isSubsetOf(emptySet)).isFalse();
     }
 
     @Test
     void setWithOneElementIsSubsetOfAnotherSetWithThatElementAndAnother() {
-        MySet setA = new MySet();
-        setA.add("something");
-        MySet setB = new MySet();
-        setB.add("something");
-        setB.add("something else");
+        MySet setA = makeSetWith("something");
+        MySet setB = makeSetWith("something", "something else");
 
         assertThat(setA.isSubsetOf(setB)).isTrue();
+    }
+
+    @Test
+    void twoDisjointSetsAreNotSubsetsOfEachOther() {
+        MySet setA = makeSetWith("something");
+        MySet setB = makeSetWith("something else");
+
+        assertThat(setA.isSubsetOf(setB)).isFalse();
+    }
+
+    @Test
+    void twoEmptySetsAreEqual() {
+        MySet emptySet1 = new MySet();
+        MySet emptySet2 = new MySet();
+
+        assertThat(emptySet1.isEqualTo(emptySet2)).isTrue();
+    }
+
+    @Test
+    void aNonemptySetIsNotEqualToTheEmptySet() {
+        MySet emptySet = new MySet();
+        MySet nonemptySet = makeSetWith("something");
+
+        assertThat(nonemptySet.isEqualTo(emptySet)).isFalse();
+    }
+
+    @Test
+    void twoDisjointSetsAreNotEqual() {
+        MySet setA = makeSetWith("something");
+        MySet setB = makeSetWith("something else");
+
+        assertThat(setA.isEqualTo(setB)).isFalse();
     }
 }

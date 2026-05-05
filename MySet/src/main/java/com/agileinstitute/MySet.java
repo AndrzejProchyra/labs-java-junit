@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public class MySet {
-    private Set<String> trackingNumbers = new HashSet<>();
+    private final Set<String> trackingNumbers = new HashSet<>();
 
     public static MySet union(MySet setA, MySet setB) {
         MySet newSet = new MySet();
@@ -43,6 +43,10 @@ public class MySet {
     }
 
     public boolean isSubsetOf(MySet otherSet) {
-        return isEmpty();
+        return otherSet.trackingNumbers.containsAll(trackingNumbers);
+    }
+
+    public boolean isEqualTo(MySet otherSet) {
+        return isSupersetOf(otherSet) && isSubsetOf(otherSet);
     }
 }
