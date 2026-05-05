@@ -10,7 +10,7 @@ import Untouchables.WebGadget;
  * Note also that it is production code.
  */
 public class Galaxy {
-    private WebGadget webContext;
+    private final WebGadget webContext;
 
     public Galaxy(WebGadget webContext) {
         this.webContext = webContext;

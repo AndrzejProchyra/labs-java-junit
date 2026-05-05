@@ -1,24 +1,32 @@
 package StarTrek;
 
-import java.util.Random;
-
+import StarTrek.WeaponSystems.Phasers;
+import StarTrek.WeaponSystems.PhotonTorpedoes;
 import Untouchables.WebGadget;
+
+import java.util.Random;
 
 public class Game {
 
-	private int e = 10000;
-	private int t = 8;
+    private final Phasers phasers;
+    private final PhotonTorpedoes photonTorpedoes;
 
-    public int EnergyRemaining() {
-        return e;
+    public Game(Random random) {
+        phasers = new Phasers(random);
+        photonTorpedoes = new PhotonTorpedoes(random);
+    }
+
+
+    public int energyRemaining() {
+        return phasers.energyRemaining();
     }
 
     public void setTorpedoes(int value) {
-            t = value;
-        }
+        photonTorpedoes.setTorpedoes(value);
+    }
+
     public int getTorpedoes() {
-            return t;
-        
+        return photonTorpedoes.getTorpedoes();
     }
 
     public void fireWeapon(WebGadget wg) {
@@ -26,63 +34,13 @@ public class Game {
     }
 
     public void fireWeapon(Galaxy wg) {
-        if (wg.parameter("command").equals("phaser")) {
-			int amount = Integer.parseInt(wg.parameter("amount"));
-			Klingon enemy = (Klingon) wg.variable("target");
-			if (e >= amount) {
-				int distance = enemy.distance();
-				if (distance > 4000) {
-					wg.writeLine("Klingon out of range of phasers at " + distance + " sectors...");
-				} else {
-					int damage = amount - (((amount /20)* distance /200) + rnd(200));
-					if (damage < 1)
-						damage = 1;
-					wg.writeLine("Phasers hit Klingon at " + distance + " sectors with " + damage + " units");
-					if (damage < enemy.getEnergy()) {
-						enemy.setEnergy(enemy.getEnergy() - damage);
-						wg.writeLine("Klingon has " + enemy.getEnergy() + " remaining");
-					} else {
-						wg.writeLine("Klingon destroyed!");
-						enemy.delete();
-					}
-				}
-				e -= amount;
-
-			} else {
-				wg.writeLine("Insufficient energy to fire phasers!");
-			}
-
-		} else if (wg.parameter("command").equals("photon")) {
-			Klingon enemy = (Klingon) wg.variable("target");
-			if (t  > 0) {
-				int distance = enemy.distance();
-				if ((rnd(4) + ((distance / 500) + 1) > 7)) {
-					wg.writeLine("Torpedo missed Klingon at " + distance + " sectors...");
-				} else {
-					int damage = 800 + rnd(50);
-					wg.writeLine("Photons hit Klingon at " + distance + " sectors with " + damage + " units");
-					if (damage < enemy.getEnergy()) {
-						enemy.setEnergy(enemy.getEnergy() - damage);
-						wg.writeLine("Klingon has " + enemy.getEnergy() + " remaining");
-					} else {
-						wg.writeLine("Klingon destroyed!");
-						enemy.delete();
-					}
-				}
-				t -= 1;
-
-			} else {
-				wg.writeLine("No more photon torpedoes!");
-			}
-		}
-	}
-
-    // note we made generator public in order to mock it
-    // it's ugly, but it's telling us something about our *design!* ;-)
-	public static Random generator = new Random();
-	private static int rnd(int maximum) {
-		return generator.nextInt(maximum);
-	}
-
+        String weapon = wg.parameter("command");
+        Klingon enemy = (Klingon) wg.variable("target");
+        if (weapon.equals("phaser")) {
+            phasers.fireAt(enemy, wg);
+        } else if (weapon.equals("photon")) {
+            photonTorpedoes.fireAt(enemy, wg);
+        }
+    }
 
 }

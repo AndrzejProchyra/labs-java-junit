@@ -11,14 +11,9 @@ class PhotonCharacterizationTests {
     private Game game;
     private MockGalaxy context;
 
-    @AfterEach
-    void RemoveTheMockRandomGeneratorForOtherTests_IReallyWantToRefactorThatStaticVariableSoon() {
-        Game.generator = new Random();
-    }
-
     @BeforeEach
     void setUp() {
-        game = new Game();
+        game = new Game(new MockRandom());
         context = new MockGalaxy();
         context.setValueForTesting("command", "photon");
     }
@@ -36,7 +31,6 @@ class PhotonCharacterizationTests {
     void TorpedoMissesDueToRandomFactors() {
         int distanceWhereRandomFactorsHoldSway = 2500;
         context.setValueForTesting("target", new MockKlingon(distanceWhereRandomFactorsHoldSway, 200));
-        Game.generator = new MockRandom(); // without this the test would often fail
         game.fireWeapon(context);
         Assertions.assertEquals("Torpedo missed Klingon at 2500 sectors... || ",
                 context.getAllOutput());
@@ -57,7 +51,6 @@ class PhotonCharacterizationTests {
     void TorpedoDestroysKlingon() {
         MockKlingon klingon = new MockKlingon(500, 200);
         context.setValueForTesting("target", klingon);
-        Game.generator = new MockRandom();
         game.fireWeapon(context);
         Assertions.assertEquals("Photons hit Klingon at 500 sectors with 825 units || Klingon destroyed! || ",
                 context.getAllOutput());
@@ -69,11 +62,9 @@ class PhotonCharacterizationTests {
     @Test
     void TorpedoDamagesKlingon() {
         context.setValueForTesting("target", new MockKlingon(500, 2000));
-        Game.generator = new MockRandom();
         game.fireWeapon(context);
         Assertions.assertEquals("Photons hit Klingon at 500 sectors with 825 units || Klingon has 1175 remaining || ",
                 context.getAllOutput());
         Assertions.assertEquals(7, game.getTorpedoes());
     }
-
 }
