@@ -12,27 +12,35 @@ public class PhotonTorpedoes extends WeaponSystem {
         super(random);
     }
 
-    @Override
-    public void fireAt(Klingon enemy1, Galaxy wg1) {
-        if (getTorpedoes() > 0) {
-            int distance = enemy1.distance();
-            if ((rnd(4) + ((distance / 500) + 1) > 7)) {
-                wg1.writeLine("Torpedo missed Klingon at " + distance + " sectors...");
-            } else {
-                int damage = 800 + rnd(50);
-                wg1.writeLine("Photons hit Klingon at " + distance + " sectors with " + damage + " units");
-                if (damage < enemy1.getEnergy()) {
-                    enemy1.setEnergy(enemy1.getEnergy() - damage);
-                    wg1.writeLine("Klingon has " + enemy1.getEnergy() + " remaining");
-                } else {
-                    wg1.writeLine("Klingon destroyed!");
-                    enemy1.delete();
-                }
-            }
-            decrementTorpedoesByOne();
-        } else {
-            wg1.writeLine("No more photon torpedoes!");
-        }
+    protected int getAmount(Galaxy wg1) {
+        return 1;
+    }
+
+    protected boolean hasAmmo(int amount) {
+        return getTorpedoes() >= amount;
+    }
+
+    protected String outOfAmmoMessage() {
+        return "No more photon torpedoes!";
+    }
+
+    protected String hitMessage(Klingon enemy1, int damage) {
+        return "Photons hit Klingon at " + enemy1.distance() + " sectors with " + damage + " units";
+    }
+
+    protected int calculateDamage(Klingon unusedEnemy, int unusedAmount) {
+        int damage = 800 + rnd(50);
+        return damage;
+    }
+
+    protected String missedMessage(Klingon enemy) {
+        int distance = enemy.distance();
+        return "Torpedo missed Klingon at " + distance + " sectors...";
+    }
+
+    protected boolean misses(Klingon enemy) {
+        int distance = enemy.distance();
+        return rnd(4) + ((distance / 500) + 1) > 7;
     }
 
     public int getTorpedoes() {
@@ -40,8 +48,8 @@ public class PhotonTorpedoes extends WeaponSystem {
 
     }
 
-    private void decrementTorpedoesByOne() {
-        torpedoesRemaining--;
+    protected void decrementAmmo(int amount) {
+        torpedoesRemaining -= amount;
     }
 
     public void setTorpedoes(int value) {

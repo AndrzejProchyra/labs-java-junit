@@ -14,37 +14,44 @@ public class Phasers extends WeaponSystem {
         super(random);
     }
 
-    @Override
-    public void fireAt(Klingon enemy1, Galaxy wg1) {
-        int amount = Integer.parseInt(wg1.parameter("amount"));
-        if (energyRemaining() >= amount) {
-            int distance = enemy1.distance();
-            if (distance > PHASER_RANGE) {
-                wg1.writeLine("Klingon out of range of phasers at " + distance + " sectors...");
-            } else {
-                int damage = amount - (((amount / 20) * distance / 200) + rnd(200));
-                if (damage < 1)
-                    damage = 1;
-                wg1.writeLine("Phasers hit Klingon at " + distance + " sectors with " + damage + " units");
-                if (damage < enemy1.getEnergy()) {
-                    enemy1.setEnergy(enemy1.getEnergy() - damage);
-                    wg1.writeLine("Klingon has " + enemy1.getEnergy() + " remaining");
-                } else {
-                    wg1.writeLine("Klingon destroyed!");
-                    enemy1.delete();
-                }
-            }
-            decrementEnergyBy(amount);
-        } else {
-            wg1.writeLine("Insufficient energy to fire phasers!");
-        }
+    protected int getAmount(Galaxy wg1) {
+        return Integer.parseInt(wg1.parameter("amount"));
+    }
+
+    protected boolean hasAmmo(int amount) {
+        return energyRemaining() >= amount;
+    }
+
+    protected String outOfAmmoMessage() {
+        return "Insufficient energy to fire phasers!";
+    }
+
+    protected String hitMessage(Klingon enemy1, int damage) {
+        return "Phasers hit Klingon at " + enemy1.distance() + " sectors with " + damage + " units";
+    }
+
+    protected int calculateDamage(Klingon enemy1, int amount) {
+        int damage = amount - (((amount / 20) * enemy1.distance() / 200) + rnd(200));
+        if (damage < 1)
+            damage = 1;
+        return damage;
+    }
+
+    protected String missedMessage(Klingon enemy) {
+        int distance = enemy.distance();
+        return "Klingon out of range of phasers at " + distance + " sectors...";
+    }
+
+    protected boolean misses(Klingon enemy) {
+        int distance = enemy.distance();
+        return distance > PHASER_RANGE;
     }
 
     public int energyRemaining() {
         return energyRemaining;
     }
 
-    private void decrementEnergyBy(int amount) {
+    protected void decrementAmmo(int amount) {
         energyRemaining -= amount;
     }
 }
