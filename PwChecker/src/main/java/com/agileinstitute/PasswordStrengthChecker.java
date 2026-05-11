@@ -28,7 +28,14 @@ public class PasswordStrengthChecker {
     }
 
     public Set<String> isStrongEnoughVerbose(String candidate) {
+        return isStrongEnoughVerbose(candidate, false);
+    }
+
+    public Set<String> isStrongEnoughVerbose(String candidate, boolean adminFlag) {
         final Set<String> reasons = new HashSet<>();
+        if (adminFlag) {
+            return Set.of("Password must have at least 10 characters");
+        }
         if (!isLongEnough(candidate)) {
             reasons.add("Password must have at least 8 characters");
         }
