@@ -155,7 +155,31 @@ class PasswordStrengthCheckerTest {
             // when
             Set<String> result = checker.isStrongEnoughVerbose(candidate, true);
             // then
-            assertThat(result).containsOnly("Password must have at least 10 characters");
+            assertThat(result).containsOnly("Password must have at least 11 characters");
+        }
+
+        @Test
+        void passwordWithoutAlphaShouldReturnNoAlphaReason() {
+            // given
+            final PasswordStrengthChecker checker = new PasswordStrengthChecker();
+            // when
+            String longEnoughPasswordWithoutAlpha = "12345678...";
+            Set<String> result = checker.isStrongEnoughVerbose(longEnoughPasswordWithoutAlpha, true);
+            // then
+            assertThat(result).containsOnly("Password must contain at least one letter");
+        }
+
+        @Test
+        void passwordWithoutDigitShouldReturnNoDigitsReason() {
+            // given
+            final PasswordStrengthChecker checker = new PasswordStrengthChecker();
+            // when
+            String longEnoughPasswordWithoutAlpha = "abcdefgh...";
+            Set<String> result = checker.isStrongEnoughVerbose(longEnoughPasswordWithoutAlpha, true);
+            // then
+            assertThat(result).containsOnly("Password must contain at least one digit");
         }
     }
+
+
 }

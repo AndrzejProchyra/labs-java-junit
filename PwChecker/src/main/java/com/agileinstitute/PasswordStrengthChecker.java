@@ -1,30 +1,26 @@
 package com.agileinstitute;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.util.Collections.emptySet;
 
 public class PasswordStrengthChecker {
 
-    public static final int MINIMUM_LENGTH = 8;
+    private static final Set<Rule> STANDARD_RULES = Set.of(
+            new PasswordLengthRule(8),
+            new PasswordContainsLetterRule(),
+            new PasswordContainsDigitRule()
+    );
+
+    private static final Set<Rule> ADMIN_RULES = Set.of(
+            new PasswordLengthRule(11),
+            new PasswordContainsLetterRule(),
+            new PasswordContainsDigitRule()
+    );
 
     public boolean isStrongEnough(String pw) {
         return isStrongEnoughVerbose(pw).isEmpty();
-    }
-
-    private boolean isLongEnough(String pw) {
-        return pw.length() >= MINIMUM_LENGTH;
-    }
-
-    private boolean hasNumeric(String pw) {
-        return pw.chars()
-                .mapToObj(c -> (char) c)
-                .anyMatch(Character::isDigit);
-    }
-
-    private boolean hasChar(String pw) {
-        return pw.chars()
-                .mapToObj(c -> (char) c)
-                .anyMatch(Character::isAlphabetic);
     }
 
     public Set<String> isStrongEnoughVerbose(String candidate) {
@@ -32,19 +28,76 @@ public class PasswordStrengthChecker {
     }
 
     public Set<String> isStrongEnoughVerbose(String candidate, boolean adminFlag) {
-        final Set<String> reasons = new HashSet<>();
         if (adminFlag) {
-            return Set.of("Password must have at least 10 characters");
+            return new InnerPwChecker(ADMIN_RULES).invoke(candidate);
         }
-        if (!isLongEnough(candidate)) {
-            reasons.add("Password must have at least 8 characters");
+        return new InnerPwChecker(STANDARD_RULES).invoke(candidate);
+    }
+
+    private static class InnerPwChecker {
+        private final Set<Rule> rules;
+
+        public InnerPwChecker(Set<Rule> rules) {
+            this.rules = rules;
         }
-        if (!hasChar(candidate)) {
-            reasons.add("Password must contain at least one letter");
+
+        public Set<String> invoke(String candidate) {
+            return rules.stream()
+                    .map(r -> r.invoke(candidate))
+                    .flatMap(Set::stream)
+                    .collect(Collectors.toSet());
         }
-        if (!hasNumeric(candidate)) {
-            reasons.add("Password must contain at least one digit");
+    }
+
+    interface Rule {
+        Set<String> invoke(String candidate);
+    }
+
+    static class PasswordLengthRule implements Rule {
+        final int requiredLength;
+
+        PasswordLengthRule(int requiredLength) {
+            this.requiredLength = requiredLength;
         }
-        return reasons;
+
+        @Override
+        public Set<String> invoke(String candidate) {
+            if (candidate.length() >= requiredLength) {
+                return emptySet();
+            }
+            return Set.of("Password must have at least " + requiredLength + " characters");
+        }
+    }
+
+    static class PasswordContainsDigitRule implements Rule {
+        @Override
+        public Set<String> invoke(String candidate) {
+            if (candidate.chars().anyMatch(Character::isDigit)) {
+                return emptySet();
+            }
+            return Set.of("Password must contain at least one digit");
+        }
+    }
+
+    static class PasswordContainsLetterRule implements Rule {
+        @Override
+        public Set<String> invoke(String candidate) {
+            if (candidate.chars().anyMatch(Character::isLetter)) {
+                return emptySet();
+            }
+            return Set.of("Password must contain at least one letter");
+        }
+    }
+
+    static class PasswordContainsSpecialCharacterRule implements Rule {
+        private static final Set<Integer> SPECIAL_CHARACTERS = "#".chars().boxed().collect(Collectors.toSet());
+
+        @Override
+        public Set<String> invoke(String candidate) {
+            if (candidate.codePoints().noneMatch(SPECIAL_CHARACTERS::contains)) {
+                return Set.of("Password must contain at least one special character");
+            }
+            return emptySet();
+        }
     }
 }
