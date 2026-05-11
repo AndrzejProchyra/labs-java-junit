@@ -15,6 +15,7 @@
         <module>GettingItWorking</module>
         <module>MySet</module>
         <module>PwChecker</module>
+        <module>Salvo</module>
     </modules>
 
     <properties>
